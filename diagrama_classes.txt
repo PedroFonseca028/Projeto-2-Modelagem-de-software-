@@ -1,0 +1,185 @@
+---
+config:
+  layout: elk
+---
+classDiagram
+direction TB
+
+    class Cliente {
+        +String id
+        +String nome
+        +String email
+        +String documentoAcademico
+        +String tipoCliente      
+        +String status           
+        +Date dataNascimento
+        +atualizarDados(nome, email, documentoAcademico, dataNascimento)
+        +confirmarEmail(codigo)
+        +visualizarVeiculosDisponiveis()
+        +solicitarReserva(veiculo)
+        +cancelarReserva(reserva)
+        +iniciarViagem(reserva)
+        +encerrarViagem(viagem)
+        +consultarViagens()
+        +informarPagamento(dadosCartao)
+    }
+
+    class Administrador {
+        +String id
+        +String nome
+        +String email
+        +validarCadastro()
+        +cadastrarVeiculo(veiculo)
+        +removerVeiculo(veiculo)
+        +configurarTarifa(tarifa)
+        +definirZona(zona)
+        +emitirRelatorio(periodo)
+    }
+
+    class Veiculo {
+        +String id
+        +String codigoQRCode
+        +String modelo
+        +String categoria        
+        +String municipioOperacao
+        +String estadoOperacional 
+        +int nivelBateria
+        +double latitude
+        +double longitude
+        +atualizarPosicao(lat, lon)
+        +atualizarNivelBateria(nivel)
+        +alterarEstado(estado)
+    }
+
+    class FirmwareVeiculo {
+    +String id
+    +String versao
+    +boolean conectado
+    +aplicarLimiteVelocidade(limite)
+    +removerLimiteVelocidade()
+    +receberParametroZona(zona)
+    +reportarStatusComunicacao()
+}
+
+    class Reserva {
+        +String id
+        +Date dataHoraCriacao
+        +Date dataHoraExpiracao
+        +String status   
+        +confirmar()
+        +cancelar()
+        +marcarExpirada()
+    }
+
+    class Viagem {
+        +String id
+        +Date dataHoraInicio
+        +Date dataHoraFim
+        +String localInicio
+        +String localFim
+        +double distanciaEstimativa
+        +double valorCalculado
+        +String status   
+        +iniciar()
+        +encerrar()
+        +calcularValor(tarifa)
+    }
+
+    class Tarifa {
+        +String id
+        +String municipio
+        +String tipoVeiculo
+        +String tipoTarifa          
+        +double taxaDesbloqueio
+        +double valorPorMinuto
+        +int minutosInclusos        
+        +int diasValidade           
+        +double descontoPorcentual  
+        +calcularValor(distancia, tempo)
+    }
+
+    class Zona {
+        +String id
+        +String nome
+        +String tipoZona    
+        +validarPosicao(posicao)
+        +permiteEstacionar()
+    }
+
+    class Regulamentacao {
+        +String id
+        +String municipio
+        +String descricao
+        +Date dataVigenciaInicio
+        +Date dataVigenciaFim
+        +estaVigente(data)
+    }
+
+    class OrdemDeServico {
+        +String id
+        +String tipo     
+        +String motivo
+        +Date dataHoraCriacao
+        +Date dataDeConclusao
+        +String status   
+        +abrir()
+        +atualizarStatus(status)
+    }
+
+    class EquipeOperacional {
+        +String id
+        +String nomeEquipe
+        +executarOrdem(ordem)
+    }
+
+    class PagamentoAPI {
+        +validarCartao(dadosCartao)
+        +processarPagamento(valor)
+        +confirmarTransacao()
+        +estornarPagamento(valor)
+    }
+
+    class Relatorio {
+        +String id
+        +Date periodoInicio
+        +Date periodoFim
+        +double valorTotal
+        +int totalViagens
+        +int totalClientes
+        +gerarPorCliente(cliente)
+        +gerarPorVeiculo(veiculo)
+        +gerarPorZona(zona)
+        +gerarConsolidado(periodoInicio, periodoFim)
+        +exportar()
+    }
+
+    %% Associações
+
+    Cliente "1" -- "0..*" Reserva : realiza
+    Cliente "1" -- "0..*" Viagem : inicia
+    Cliente .. PagamentoAPI : realiza_pagamento
+
+    Administrador "1" -- "0..*" Veiculo : gerencia
+    Administrador "1" -- "0..*" Tarifa : configura
+    Administrador "1" -- "0..*" Zona : define
+    Administrador "1" -- "0..*" Relatorio : solicita
+
+    Veiculo "1" -- "0..*" Reserva : reservado_por
+    Veiculo "1" -- "0..*" Viagem : utilizado_em
+    Veiculo "1" -- "0..*" OrdemDeServico : alvo_de
+    Veiculo "1" -- "0..1" Zona : esta_em
+
+    Veiculo "1" -- "1" FirmwareVeiculo : controlado_por
+    Zona .. FirmwareVeiculo : envia_restricao
+
+    Reserva "1" -- "0..1" Viagem : origina
+
+    Viagem "1" -- "1" Tarifa : calcula_com
+
+    Zona "0..*" -- "0..*" Regulamentacao : segue
+
+    EquipeOperacional "1" -- "0..*" OrdemDeServico : executa
+
+    Viagem .. Relatorio : compoe
+    Veiculo .. Relatorio : compoe
+    Zona .. Relatorio : compoe
