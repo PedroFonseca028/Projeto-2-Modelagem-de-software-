@@ -1,0 +1,61 @@
+@startuml
+title Gerenciar Manutenção
+
+|Veiculo|
+start
+:Monitorar bateria e estado operacional;
+
+if (Bateria crítica ou defeito?) then (não)
+
+    :Continuar operação normal;
+
+else (sim)
+
+    |OrdemDeServico|
+    :Abrir ordem de serviço;
+
+    |EquipeOperacional|
+    :Receber ordem;
+    :Localizar veículo;
+
+    if (Veículo localizado?) then (não)
+
+        |OrdemDeServico|
+        :Manter ordem pendente;
+
+    else (sim)
+
+        :Recolher veículo;
+
+        |Veiculo|
+        :Alterar estado para EM MANUTENCAO;
+
+        |EquipeOperacional|
+        :Diagnosticar problema;
+
+        if (Problema corrigido?) then (não)
+
+            :Encaminhar para suporte técnico;
+
+            |OrdemDeServico|
+            :Registrar manutenção pendente;
+
+        else (sim)
+
+            :Executar manutenção;
+            :Finalizar reparo;
+
+            |OrdemDeServico|
+            :Atualizar status para CONCLUIDA;
+
+            |Veiculo|
+            :Alterar estado para DISPONÍVEL;
+
+        endif
+
+    endif
+
+endif
+
+stop
+@enduml

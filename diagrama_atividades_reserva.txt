@@ -1,0 +1,108 @@
+@startuml
+title Processo de Reserva Completo
+
+|Cliente|
+start
+:Consultar veículos disponíveis;
+:Selecionar veículo;
+
+|Veiculo|
+:Validar disponibilidade;
+
+if (Veículo disponível?) then (não)
+
+    |Cliente|
+    :Receber indisponibilidade;
+
+else (sim)
+
+    |Reserva|
+    :Criar reserva;
+    :Definir prazo limite;
+    :Alterar status para RESERVADA;
+
+    |Cliente|
+    :Confirmar desbloqueio;
+    :Ler QR Code;
+
+    |Reserva|
+    :Validar prazo;
+
+    if (Reserva expirada?) then (sim)
+
+        :Cancelar reserva;
+
+        |Veiculo|
+        :Alterar estado para DISPONÍVEL;
+
+    else (não)
+
+        |Veiculo|
+        :Validar QR Code;
+
+        if (QR Code válido?) then (não)
+
+            |Cliente|
+            :Receber erro de QR Code inválido;
+
+        else (sim)
+
+            |FirmwareVeiculo|
+            :Desbloquear veículo;
+
+            |Viagem|
+            :Iniciar viagem;
+
+            |Veiculo|
+            :Alterar estado para EM USO;
+
+            |Cliente|
+            :Utilizar veículo;
+            :Solicitar encerramento da viagem;
+
+            |Zona|
+            :Validar posição GPS;
+
+            if (Zona permitida?) then (não)
+
+                |Cliente|
+                :Reposicionar veículo;
+
+            else (sim)
+
+                |Viagem|
+                :Registrar horário final;
+                :Calcular valor;
+
+                |PagamentoAPI|
+                :Validar cartão;
+                :Processar pagamento;
+
+                if (Pagamento aprovado?) then (não)
+
+                    |Viagem|
+                    :Registrar pendência financeira;
+
+                else (sim)
+
+                    |Viagem|
+                    :Registrar transação;
+
+                    |Veiculo|
+                    :Alterar estado para DISPONÍVEL;
+
+                    |Cliente|
+                    :Visualizar resumo da viagem;
+
+                endif
+
+            endif
+
+        endif
+
+    endif
+
+endif
+
+stop
+@enduml

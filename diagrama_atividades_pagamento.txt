@@ -1,0 +1,46 @@
+@startuml
+title Gerenciar Pagamento
+
+|Viagem|
+start
+:Solicitar cálculo da viagem;
+
+|Tarifa|
+:Calcular valor da viagem;
+
+|Cliente|
+:Informar dados do cartão;
+
+|PagamentoAPI|
+:Receber solicitação;
+:Validar cartão;
+
+if (Cartão válido?) then (não)
+
+    :Recusar transação;
+    :Registrar pagamento recusado;
+
+else (sim)
+
+    :Efetuar cobrança;
+    :Processar transação;
+
+    if (Saldo ou limite disponível?) then (não)
+
+        :Não aprovar transação;
+        :Registrar pagamento recusado;
+
+    else (sim)
+
+        :Confirmar deferimento;
+        :Registrar pagamento aprovado;
+
+    endif
+
+endif
+
+|Viagem|
+:Atualizar situação financeira;
+
+stop
+@enduml
